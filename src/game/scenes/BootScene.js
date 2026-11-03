@@ -40,8 +40,6 @@ export class BootScene extends Phaser.Scene {
       bottom: this.worldMap.worldHeight - WORLD_PADDING,
     };
 
-    this.createHud(width, height);
-
     const spawn = this.worldMap.playerSpawn;
     const leaderStart = this.demoEnabled
       ? { x: spawn.x + 180, y: spawn.y }
@@ -75,6 +73,7 @@ export class BootScene extends Phaser.Scene {
           : undefined
     );
     this.inputController = new PlayerInputController(this, { touchEnabled });
+    this.createHud(width, height);
 
     this.leader.setDepth(this.leader.y);
     this.follower?.setDepth(this.follower.y);
