@@ -1,54 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CharacterTrail, updateFollowerMovement } from './CharacterTrail.js';
-
-function makeSprite(x = 0, y = 0) {
-  const data = new Map([['direction', 'down']]);
-  return {
-    x, y,
-    getData: (key) => data.get(key),
-    setData: (key, value) => data.set(key, value),
-    setPosition(nextX, nextY) { this.x = nextX; this.y = nextY; },
-  };
-}
-
-test('records path points only after the configured sampling distance', () => {
-  const trail = new CharacterTrail({ sampleSpacing: 5 });
-  assert.equal(trail.record(0, 0), true);
-  assert.equal(trail.record(2, 0), false);
-  assert.equal(trail.record(6, 0), true);
-  assert.equal(trail.points.length, 2);
-});
-
-test('interpolates the follower target along corners in the leader path', () => {
-  const trail = new CharacterTrail({ sampleSpacing: 1 }).seed([
-    { x: 0, y: 0 }, { x: 10, y: 0 }, { x: 10, y: 10 },
-  ]);
-  assert.deepEqual(trail.getPointBehind(5), { x: 10, y: 5 });
-  assert.deepEqual(trail.getPointBehind(15), { x: 5, y: 0 });
-});
-
-test('trims old path data while preserving a minimum of two points', () => {
-  const trail = new CharacterTrail({ sampleSpacing: 1, maxLength: 12 });
-  trail.seed([{x:0,y:0},{x:5,y:0},{x:10,y:0},{x:15,y:0},{x:20,y:0}]);
-  assert.ok(trail.length <= 12);
-  assert.ok(trail.points.length >= 2);
-});
-
-test('moves the follower toward its target and respects stop distance', () => {
-  const trail = new CharacterTrail({ sampleSpacing: 1 }).seed([
-    { x: 0, y: 0 }, { x: 100, y: 0 },
-  ]);
-  const follower = makeSprite(0, 20);
-  const result = updateFollowerMovement(follower, trail, 100, {
-    followDistance: 30, stopDistance: 2, speed: 100,
-  });
-  assert.equal(result.moved, true);
-  assert.ok(follower.x > 0);
-
-  const closeFollower = makeSprite(70, 0);
-  const stopped = updateFollowerMovement(closeFollower, trail, 16, {
-    followDistance: 30, stopDistance: 2,
-  });
-  assert.equal(stopped.moved, false);
-});
+import {CharacterTrail,updateFollowerMovement} from './CharacterTrail.js';
+function sprite(x=0,y=0){const data=new Map([['direction','down']]);return{x,y,getData:k=>data.get(k),setData:(k,v)=>data.set(k,v),setPosition(a,b){this.x=a;this.y=b;}};}
+test('records points only after sample spacing',()=>{const t=new CharacterTrail({sampleSpacing:5});assert.equal(t.record(0,0),true);assert.equal(t.record(2,0),false);assert.equal(t.record(6,0),true);assert.equal(t.points.length,2);});
+test('interpolates points along trail corners',()=>{const t=new CharacterTrail({sampleSpacing:1}).seed([{x:0,y:0},{x:10,y:0},{x:10,y:10}]);assert.deepEqual(t.getPointBehind(5),{x:10,y:5});assert.deepEqual(t.getPointBehind(15),{x:5,y:0});});
+test('trims old path data while retaining two points',()=>{const t=new CharacterTrail({sampleSpacing:1,maxLength:12});t.seed([{x:0,y:0},{x:5,y:0},{x:10,y:0},{x:15,y:0},{x:20,y:0}]);assert.ok(t.length<=12);assert.ok(t.points.length>=2);});
+test('moves follower towards the target progress and stops at follow distance',()=>{const t=new CharacterTrail({sampleSpacing:1}).seed([{x:0,y:0},{x:100,y:0}]);const f=sprite(0,20);const r=updateFollowerMovement(f,t,100,{followDistance:30,stopDistance:2,speed:100});assert.equal(r.moved,true);assert.ok(f.x>0);const stopped=updateFollowerMovement(sprite(70,0),t,16,{followDistance:30,stopDistance:2});assert.equal(stopped.moved,false);});
+test('follower advances along route waypoints rather than cutting corners',()=>{const t=new CharacterTrail({sampleSpacing:1}).seed([{x:0,y:0},{x:20,y:0},{x:20,y:20},{x:40,y:20}]);const f=sprite(20,0);const r=updateFollowerMovement(f,t,50,{followDistance:10,stopDistance:1,speed:100});assert.equal(r.moved,true);assert.ok(r.target.x>=20);assert.ok(r.target.y>=0);});
+test('follower obeys collision callback',()=>{const t=new CharacterTrail({sampleSpacing:1}).seed([{x:0,y:0},{x:100,y:0}]);const f=sprite(0,0);const r=updateFollowerMovement(f,t,50,{followDistance:10,stopDistance:1,speed:100,canOccupy:x=>x<=2,radius:0});assert.equal(r.blocked,true);assert.ok(f.x<=2);});

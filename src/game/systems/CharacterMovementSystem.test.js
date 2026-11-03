@@ -30,7 +30,7 @@ test('maps vectors to four cardinal facing directions', () => {
 test('moves consistently by delta time and clamps to world bounds', () => {
   const sprite = makeSprite(10, 10);
   const result = updateCharacterMovement(sprite, { x: 1, y: 0 }, 100, {
-    speed: 100, maxDeltaMs: 100, bounds: { left: 0, right: 15, top: 0, bottom: 20 },
+    speed: 100, maxDeltaMs: 100, radius: 0, maxSubstep: 1, bounds: { left: 0, right: 15, top: 0, bottom: 20 },
   });
   assert.equal(result.moved, true);
   assert.equal(sprite.x, 15);

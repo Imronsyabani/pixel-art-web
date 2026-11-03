@@ -8,9 +8,11 @@ import { CharacterTrail, updateFollowerMovement } from '../systems/CharacterTrai
 import { vectorToTarget } from '../systems/movementMath.js';
 import { PlayerInputController } from '../systems/PlayerInputController.js';
 import { createGardenMap } from '../map/GardenMap.js';
+import { canOccupyPosition, getGardenObstacleRects } from '../map/GardenCollision.js';
 import { TILE_SIZE } from '../map/gardenLayout.js';
 
 const WORLD_PADDING = TILE_SIZE * 3;
+const CHARACTER_RADIUS = 10;
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -34,11 +36,18 @@ export class BootScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor('#236f9c');
     this.cameras.main.setBounds(0, 0, this.worldMap.worldWidth, this.worldMap.worldHeight);
     this.movementBounds = {
-      left: WORLD_PADDING,
-      right: this.worldMap.worldWidth - WORLD_PADDING,
-      top: WORLD_PADDING,
-      bottom: this.worldMap.worldHeight - WORLD_PADDING,
+      left: WORLD_PADDING + CHARACTER_RADIUS,
+      right: this.worldMap.worldWidth - WORLD_PADDING - CHARACTER_RADIUS,
+      top: WORLD_PADDING + CHARACTER_RADIUS,
+      bottom: this.worldMap.worldHeight - WORLD_PADDING - CHARACTER_RADIUS,
     };
+    this.worldObstacles = getGardenObstacleRects(this.worldMap.tree);
+    this.canOccupy = (x, y, radius = CHARACTER_RADIUS) => canOccupyPosition(
+      this.worldMap,
+      x,
+      y,
+      { radius, obstacles: this.worldObstacles },
+    );
 
     const spawn = this.worldMap.playerSpawn;
     const leaderStart = this.demoEnabled
@@ -93,7 +102,7 @@ export class BootScene extends Phaser.Scene {
       shadow: { offsetX: 2, offsetY: 2, color: '#23423d', blur: 2, fill: true },
     }).setScrollFactor(0).setDepth(5000);
 
-    this.add.text(28, 58, 'PHASE 6 · CLIFFSIDE FLOWER GARDEN', {
+    this.add.text(28, 58, 'PHASE 7 · COLLISION & WORLD BOUNDARIES', {
       fontFamily: '"Pixelify Sans", monospace',
       fontSize: '17px',
       color: '#f3fff2',
@@ -155,7 +164,13 @@ export class BootScene extends Phaser.Scene {
       this.leader,
       leaderVector,
       delta,
-      { speed: 150, bounds: this.movementBounds },
+      {
+        speed: 150,
+        bounds: this.movementBounds,
+        canOccupy: this.canOccupy,
+        radius: CHARACTER_RADIUS,
+        maxSubstep: 3,
+      },
     );
     this.updateCharacterVisual(this.leader, movement);
     this.updateLabelPosition(this.leader, this.leaderLabel);
@@ -168,6 +183,8 @@ export class BootScene extends Phaser.Scene {
         stopDistance: 4,
         speed: 116,
         bounds: this.movementBounds,
+        canOccupy: this.canOccupy,
+        radius: CHARACTER_RADIUS,
       });
       this.updateCharacterVisual(this.follower, follow);
       this.updateLabelPosition(this.follower, this.followerLabel);
