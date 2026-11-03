@@ -8,19 +8,25 @@ A responsive pixel-art exploration game set in a peaceful cliffside flower garde
 - Vite
 - Tailwind CSS 4
 - Pixelify Sans
+- Python + Pillow for reproducible pixel sprite generation
 
 ## Run locally
+Install the asset-generation dependency once, then start the Vite server. The predev script generates the animation sheets automatically.
 ```bash
+python -m pip install -r requirements-assets.txt
 npm install
 npm run dev
 ```
 
-## Verify assets, test, and build
+## Regenerate, validate, test, and build
 ```bash
+npm run assets:generate
 npm run assets:validate
 npm test
 npm run build
 ```
+
+Generated idle/walk PNG files are intentionally ignored by Git; they are recreated from the committed Phase 2 base spritesheets whenever the dev server or production build starts.
 
 ## URL mode
 | URL | Behavior |
@@ -38,7 +44,14 @@ Only literal `C=true` enables couple mode. Missing or invalid `G` defaults to `b
 - Kaoruko: teal/turquoise outer layer, white dress, brown flat shoes.
 - Couple mode: the character selected by `G` leads.
 
-Each character spritesheet is a transparent PNG, one horizontal row of four 64×64 frames. Frame order is `down`, `left`, `right`, `up`. The source contract is in `src/game/assets/characterAssets.js`; `public/assets/characters/manifest.json` documents the exported image format.
+Each character uses transparent PNG sprite sheets with 64×64 frames. Rows are ordered `down`, `left`, `right`, `up`; frames are ordered left-to-right within each row.
+
+| Sheet | Grid | Animation |
+| --- | --- | --- |
+| `idle.png` | 4 columns × 4 rows | 4 idle frames per direction, 3 FPS |
+| `walk.png` | 6 columns × 4 rows | 6 walk frames per direction, 9 FPS |
+
+The source generator is `scripts/generate_character_animations.py`; it derives idle/walk sheets from each approved Phase 2 base spritesheet. The exported layout is documented in `public/assets/characters/manifest.json`.
 
 ## Task tracker
 ### Phase 1 — Foundation
@@ -58,13 +71,22 @@ Each character spritesheet is a transparent PNG, one horizontal row of four 64×
 - [x] P2.7 Add asset dimension validation and automated tests
 - [ ] P2.8 Verify sprite appearance in local browser at desktop/mobile sizes
 
+### Phase 3 — Four-direction Animation
+- [x] P3.1 Generate four-direction idle sheets for both characters
+- [x] P3.2 Generate four-direction walk sheets for both characters
+- [x] P3.3 Register looping Phaser animations for all directions
+- [x] P3.4 Add animation-state switching API to CharacterFactory
+- [x] P3.5 Preview idle/walk states through the current URL mode
+- [x] P3.6 Validate PNG dimensions and transparent sprite-sheet layout
+- [x] P3.7 Add automated animation mapping tests
+- [ ] P3.8 Verify animation timing and visual quality in local browser
+
 ### Roadmap
-- Phase 3: Four-direction idle/walk animations
-- Phase 4: Single/couple movement and follower behavior
+- Phase 4: Character movement and couple follower behavior
 - Phase 5: Keyboard and mobile/tablet virtual joystick
 - Phase 6: Top-down Cliff Garden map and modular environment assets
 - Phase 7: Collision, camera, and map boundaries
 - Phase 8: Ambient ocean, flower, leaf, and petal animations
 - Phase 9: Responsive UI, audio, and performance polish
 
-Phase 2 deliberately supplies static directional frames. Animated idle/walk cycles and player movement are scheduled for later phases.
+Movement input, collisions, and follower behavior are intentionally scheduled for Phase 4 and later.

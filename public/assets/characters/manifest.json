@@ -1,12 +1,19 @@
 {
-  "version": 1,
+  "version": 2,
   "frameWidth": 64,
   "frameHeight": 64,
-  "frameCount": 4,
-  "layout": "horizontal",
   "directions": ["down", "left", "right", "up"],
+  "layout": "rows-by-direction",
   "characters": {
-    "rintaro": "rintaro/spritesheet.png",
-    "kaoruko": "kaoruko/spritesheet.png"
+    "rintaro": {
+      "base": "rintaro/spritesheet.png",
+      "idle": { "src": "rintaro/idle.png", "framesPerDirection": 4, "frameRate": 3 },
+      "walk": { "src": "rintaro/walk.png", "framesPerDirection": 6, "frameRate": 9 }
+    },
+    "kaoruko": {
+      "base": "kaoruko/spritesheet.png",
+      "idle": { "src": "kaoruko/idle.png", "framesPerDirection": 4, "frameRate": 3 },
+      "walk": { "src": "kaoruko/walk.png", "framesPerDirection": 6, "frameRate": 9 }
+    }
   }
 }

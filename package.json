@@ -1,14 +1,17 @@
 {
   "name": "cliff-garden",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
+    "predev": "npm run assets:generate",
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run assets:generate && npm run assets:validate && vite build",
+    "build:ci": "vite build",
     "preview": "vite preview",
     "test": "node --test",
-    "assets:validate": "node scripts/validate-character-assets.js"
+    "assets:validate": "node scripts/validate-character-assets.js",
+    "assets:generate": "python scripts/generate_character_animations.py"
   },
   "dependencies": {
     "phaser": "^3.90.0"

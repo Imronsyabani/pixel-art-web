@@ -1,24 +1,26 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CHARACTER_ASSETS, CHARACTER_DIRECTIONS, getCharacterFrame } from './characterAssets.js';
+import { CHARACTER_ASSETS, CHARACTER_DIRECTIONS, getCharacterFrame, getDirectionRow } from './characterAssets.js';
 
-test('both character assets share the 64x64 four-direction sheet contract', () => {
+test('both characters use consistent 64x64 idle and walk sheets', () => {
   assert.deepEqual([...Object.keys(CHARACTER_ASSETS)].sort(), ['kaoruko', 'rintaro']);
   for (const asset of Object.values(CHARACTER_ASSETS)) {
     assert.equal(asset.frameWidth, 64);
     assert.equal(asset.frameHeight, 64);
-    assert.equal(asset.frameCount, 4);
+    assert.equal(asset.idleFrameCount, 4);
+    assert.equal(asset.walkFrameCount, 6);
     assert.deepEqual([...asset.directions], ['down', 'left', 'right', 'up']);
-    assert.match(asset.src, /^\/assets\/characters\/(rintaro|kaoruko)\/spritesheet\.png$/);
+    assert.match(asset.idleSrc, /^\/assets\/characters\/(rintaro|kaoruko)\/idle\.png$/);
+    assert.match(asset.walkSrc, /^\/assets\/characters\/(rintaro|kaoruko)\/walk\.png$/);
   }
 });
 
-test('direction names map to stable frame indices', () => {
-  assert.deepEqual(CHARACTER_DIRECTIONS.map((direction) => getCharacterFrame('rintaro', direction)), [0, 1, 2, 3]);
-  assert.equal(getCharacterFrame('kaoruko', 'up'), 3);
+test('direction names map to consistent texture rows and idle frame starts', () => {
+  assert.deepEqual(CHARACTER_DIRECTIONS.map((direction) => getDirectionRow('rintaro', direction)), [0, 1, 2, 3]);
+  assert.deepEqual(CHARACTER_DIRECTIONS.map((direction) => getCharacterFrame('kaoruko', direction)), [0, 4, 8, 12]);
 });
 
 test('unknown characters and directions fail clearly', () => {
-  assert.throws(() => getCharacterFrame('unknown'), /Unknown character asset/);
-  assert.throws(() => getCharacterFrame('rintaro', 'diagonal'), /Unknown direction/);
+  assert.throws(() => getDirectionRow('unknown'), /Unknown character asset/);
+  assert.throws(() => getDirectionRow('rintaro', 'diagonal'), /Unknown direction/);
 });
