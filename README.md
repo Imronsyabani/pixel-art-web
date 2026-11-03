@@ -4,11 +4,11 @@ A responsive pixel-art exploration game set in a peaceful cliffside flower garde
 
 ## Stack
 - JavaScript ES modules
-- Phaser 3
+- Phaser 3 tilemaps
 - Vite
 - Tailwind CSS 4
 - Pixelify Sans
-- Python + Pillow for reproducible pixel sprite generation
+- Python + Pillow for reproducible character sprite generation
 
 ## Run locally
 ```bash
@@ -40,24 +40,27 @@ Only literal `C=true` enables couple mode. Missing or invalid `G` defaults to `b
 - Desktop: WASD or arrow keys.
 - Mobile/tablet: drag the semi-transparent virtual joystick at the bottom-left.
 - Only the leader receives player input. In couple mode the follower traces the leader's path automatically.
-- `?touch=true` forces the joystick UI for desktop preview; `?touch=false` hides it on touch-capable devices.
+- `?touch=true` forces joystick UI for desktop preview; `?touch=false` hides it on touch-capable devices.
 - `?demo=true` runs the optional automatic movement demo.
 
-## Character assets and animation
-- Rintaro: black hair, plain dark blue T-shirt with white collar, black jeans, black wristwatch, casual white shoes, no bag.
-- Kaoruko: teal/turquoise outer layer, white dress, brown flat shoes.
-- Sprite frames are 64×64 pixels. Direction rows: down, left, right, up.
-- Idle: 4 frames per direction at 3 FPS.
-- Walk: 6 frames per direction at 9 FPS.
+## World and character assets
+- The garden is a 72×48 tile world with 32×32 tiles.
+- The sea surrounds the island; a sandy beach, cliff rim and winding stone path connect the garden to a lookout.
+- A large central tree is surrounded by flower beds; blue flowers are the dominant color.
+- Benches, rocks, shrubs and a fence add landmarks.
+- Character frames are 64×64 pixels. Direction rows: down, left, right, up.
+- Idle: 4 frames per direction at 3 FPS. Walk: 6 frames per direction at 9 FPS.
+
+The map atlas is generated procedurally in Phaser from pixel-sized rectangles. Its layout logic is in `src/game/map/gardenLayout.js`; rendering and prop textures are in `src/game/map/GardenMap.js`.
 
 ## Task tracker
 
 ### Phase 1 — Foundation
-- [x] P1.1 Vite + Phaser + Tailwind project foundation
-- [x] P1.2 Responsive logical canvas (960×540, FIT)
-- [x] P1.3 URL game-mode parser and tests
-- [x] P1.4 Pixelify Sans selected and applied
-- [x] P1.5 GitHub Actions test/build workflow
+- [x] Vite + Phaser + Tailwind project foundation
+- [x] Responsive logical canvas (960×540, FIT)
+- [x] URL game-mode parser and tests
+- [x] Pixelify Sans selected and applied
+- [x] GitHub Actions test/build workflow
 
 ### Phase 2 — Character Asset Pipeline
 - [x] P2.1 Define 64×64 frame contract and direction ordering
@@ -96,11 +99,23 @@ Only literal `C=true` enables couple mode. Missing or invalid `G` defaults to `b
 - [x] P5.3 Show joystick only on touch devices by default
 - [x] P5.4 Add URL overrides to preview/hide touch controls
 - [x] P5.5 Connect input only to the leader and preserve follower behavior
-- [x] P5.6 Add input-vector automated tests
+- [x] P5.6 Add keyboard, analog vector, and pointer interaction tests
 - [ ] P5.7 Verify keyboard and joystick interaction in local browsers/devices
 
+### Phase 6 — Cliff Garden Map
+- [x] P6.1 Build a deterministic 72×48 tile layout
+- [x] P6.2 Add sea, beach, cliff rim and grass ground tiles
+- [x] P6.3 Add a winding stone path and beach branch
+- [x] P6.4 Add a large central tree and blue-dominant flower beds
+- [x] P6.5 Add decorative props: bench, rocks, shrubs and fence
+- [x] P6.6 Integrate map tile layers into Phaser
+- [x] P6.7 Move player spawn and camera follow into the larger world
+- [x] P6.8 Add deterministic layout tests for key map features
+- [ ] P6.9 Verify map composition and camera behavior in local browser
+
 ### Roadmap
-- Phase 6: Top-down Cliff Garden map and modular environment assets
-- Phase 7: Collision, camera, and map boundaries
-- Phase 8: Ambient ocean, flower, leaf, and petal animations
-- Phase 9: Responsive UI, audio, and performance polish
+- Phase 7: Collision, camera bounds polish and map boundaries
+- Phase 8: Ambient ocean, flower, leaf and petal animations
+- Phase 9: Responsive UI, audio and performance polish
+
+Shoreline, cliff-edge and prop collision are deliberately reserved for Phase 7. Phase 6 constrains movement to the map's world rectangle but does not yet prevent walking through scenery or into water.
