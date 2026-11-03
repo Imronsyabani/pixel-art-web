@@ -11,14 +11,13 @@ A responsive pixel-art exploration game set in a peaceful cliffside flower garde
 - Python + Pillow for reproducible pixel sprite generation
 
 ## Run locally
-Install the asset-generation dependency once, then start the Vite server. The predev script generates the animation sheets automatically.
 ```bash
 python -m pip install -r requirements-assets.txt
 npm install
 npm run dev
 ```
 
-## Regenerate, validate, test, and build
+## Verify, test, and build
 ```bash
 npm run assets:generate
 npm run assets:validate
@@ -26,7 +25,7 @@ npm test
 npm run build
 ```
 
-Generated idle/walk PNG files are intentionally ignored by Git; they are recreated from the committed Phase 2 base spritesheets whenever the dev server or production build starts.
+Generated idle/walk PNG files are ignored by Git and recreated from the committed Phase 2 base spritesheets before the dev server or production build starts.
 
 ## URL mode
 | URL | Behavior |
@@ -39,27 +38,23 @@ Generated idle/walk PNG files are intentionally ignored by Git; they are recreat
 
 Only literal `C=true` enables couple mode. Missing or invalid `G` defaults to `boy`.
 
-## Character direction and assets
+Append `&demo=true` (or use `?demo=true` without other parameters) to run the Phase 4 movement demonstration. Phase 5 will replace this demonstration with player input controls.
+
+## Character assets and animation
 - Rintaro: black hair, plain dark blue T-shirt with white collar, black jeans, black wristwatch, casual white shoes, no bag.
 - Kaoruko: teal/turquoise outer layer, white dress, brown flat shoes.
-- Couple mode: the character selected by `G` leads.
-
-Each character uses transparent PNG sprite sheets with 64×64 frames. Rows are ordered `down`, `left`, `right`, `up`; frames are ordered left-to-right within each row.
-
-| Sheet | Grid | Animation |
-| --- | --- | --- |
-| `idle.png` | 4 columns × 4 rows | 4 idle frames per direction, 3 FPS |
-| `walk.png` | 6 columns × 4 rows | 6 walk frames per direction, 9 FPS |
-
-The source generator is `scripts/generate_character_animations.py`; it derives idle/walk sheets from each approved Phase 2 base spritesheet. The exported layout is documented in `public/assets/characters/manifest.json`.
+- Sprite frames are 64×64 pixels. Direction rows: down, left, right, up.
+- Idle: 4 frames per direction at 3 FPS.
+- Walk: 6 frames per direction at 9 FPS.
 
 ## Task tracker
+
 ### Phase 1 — Foundation
-- [x] Vite + Phaser + Tailwind project foundation
-- [x] Responsive logical canvas (960×540, FIT)
-- [x] URL game-mode parser and tests
-- [x] Pixelify Sans selected and applied
-- [x] GitHub Actions test/build workflow
+- [x] P1.1 Vite + Phaser + Tailwind project foundation
+- [x] P1.2 Responsive logical canvas (960×540, FIT)
+- [x] P1.3 URL game-mode parser and tests
+- [x] P1.4 Pixelify Sans selected and applied
+- [x] P1.5 GitHub Actions test/build workflow
 
 ### Phase 2 — Character Asset Pipeline
 - [x] P2.1 Define 64×64 frame contract and direction ordering
@@ -81,12 +76,22 @@ The source generator is `scripts/generate_character_animations.py`; it derives i
 - [x] P3.7 Add automated animation mapping tests
 - [ ] P3.8 Verify animation timing and visual quality in local browser
 
+### Phase 4 — Movement & Couple Follower
+- [x] P4.1 Add delta-time based character movement
+- [x] P4.2 Normalize diagonal movement speed and apply world bounds
+- [x] P4.3 Add direction-aware idle/walk state switching
+- [x] P4.4 Record leader movement as a sampled path
+- [x] P4.5 Make the follower trace the leader path with a fixed trail distance
+- [x] P4.6 Preserve leader/follower order for both URL modes
+- [x] P4.7 Add optional movement demonstration mode
+- [x] P4.8 Add unit tests for movement and follower path logic
+- [ ] P4.9 Verify the demo visually in a local browser
+
 ### Roadmap
-- Phase 4: Character movement and couple follower behavior
 - Phase 5: Keyboard and mobile/tablet virtual joystick
 - Phase 6: Top-down Cliff Garden map and modular environment assets
 - Phase 7: Collision, camera, and map boundaries
 - Phase 8: Ambient ocean, flower, leaf, and petal animations
 - Phase 9: Responsive UI, audio, and performance polish
 
-Movement input, collisions, and follower behavior are intentionally scheduled for Phase 4 and later.
+Keyboard/touch controls are intentionally reserved for Phase 5. The Phase 4 movement demo exercises the movement and follower engine without hardwiring a temporary input system.
