@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "frameWidth": 64,
+  "frameHeight": 64,
+  "frameCount": 4,
+  "layout": "horizontal",
+  "directions": ["down", "left", "right", "up"],
+  "characters": {
+    "rintaro": "rintaro/spritesheet.png",
+    "kaoruko": "kaoruko/spritesheet.png"
+  }
+}
