@@ -43,7 +43,12 @@ function drawFlower(ctx, x, y, petals, center = '#f4eab0') {
 function drawAtlas(ctx) {
   const tile = (id, callback) => {
     const { x, y } = atlasPosition(id);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, y, TILE_SIZE, TILE_SIZE);
+    ctx.clip();
     callback(x, y);
+    ctx.restore();
   };
 
   tile(GARDEN_TILE.water, (x, y) => {
