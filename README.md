@@ -25,8 +25,6 @@ npm test
 npm run build
 ```
 
-Generated idle/walk PNG files are ignored by Git and recreated from the committed Phase 2 base spritesheets before the dev server or production build starts.
-
 ## URL mode
 | URL | Behavior |
 | --- | --- |
@@ -38,7 +36,12 @@ Generated idle/walk PNG files are ignored by Git and recreated from the committe
 
 Only literal `C=true` enables couple mode. Missing or invalid `G` defaults to `boy`.
 
-Append `&demo=true` (or use `?demo=true` without other parameters) to run the Phase 4 movement demonstration. Phase 5 will replace this demonstration with player input controls.
+## Controls
+- Desktop: WASD or arrow keys.
+- Mobile/tablet: drag the semi-transparent virtual joystick at the bottom-left.
+- Only the leader receives player input. In couple mode the follower traces the leader's path automatically.
+- `?touch=true` forces the joystick UI for desktop preview; `?touch=false` hides it on touch-capable devices.
+- `?demo=true` runs the optional automatic movement demo.
 
 ## Character assets and animation
 - Rintaro: black hair, plain dark blue T-shirt with white collar, black jeans, black wristwatch, casual white shoes, no bag.
@@ -87,11 +90,17 @@ Append `&demo=true` (or use `?demo=true` without other parameters) to run the Ph
 - [x] P4.8 Add unit tests for movement and follower path logic
 - [ ] P4.9 Verify the demo visually in a local browser
 
+### Phase 5 — Input Controls
+- [x] P5.1 Add WASD and arrow-key movement input
+- [x] P5.2 Add analog virtual joystick with deadzone and clamped radius
+- [x] P5.3 Show joystick only on touch devices by default
+- [x] P5.4 Add URL overrides to preview/hide touch controls
+- [x] P5.5 Connect input only to the leader and preserve follower behavior
+- [x] P5.6 Add input-vector automated tests
+- [ ] P5.7 Verify keyboard and joystick interaction in local browsers/devices
+
 ### Roadmap
-- Phase 5: Keyboard and mobile/tablet virtual joystick
 - Phase 6: Top-down Cliff Garden map and modular environment assets
 - Phase 7: Collision, camera, and map boundaries
 - Phase 8: Ambient ocean, flower, leaf, and petal animations
 - Phase 9: Responsive UI, audio, and performance polish
-
-Keyboard/touch controls are intentionally reserved for Phase 5. The Phase 4 movement demo exercises the movement and follower engine without hardwiring a temporary input system.

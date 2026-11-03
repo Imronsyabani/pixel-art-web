@@ -6,6 +6,7 @@ import { registerCharacterAnimations } from '../systems/CharacterAnimationSystem
 import { updateCharacterMovement } from '../systems/CharacterMovementSystem.js';
 import { CharacterTrail, updateFollowerMovement } from '../systems/CharacterTrail.js';
 import { vectorToTarget } from '../systems/movementMath.js';
+import { PlayerInputController } from '../systems/PlayerInputController.js';
 
 const WORLD_BOUNDS = Object.freeze({ left: 180, right: 780, top: 175, bottom: 405 });
 
@@ -37,13 +38,14 @@ export class BootScene extends Phaser.Scene {
       stroke: '#eefaf1',
       strokeThickness: 5,
     }).setOrigin(0.5);
-    this.add.text(width / 2, 94, 'PHASE 4 · MOVEMENT & FOLLOWER SYSTEM', {
+    this.add.text(width / 2, 94, 'PHASE 5 · KEYBOARD & TOUCH CONTROLS', {
       fontFamily: '"Pixelify Sans", monospace',
       fontSize: '22px',
       color: '#47766a',
     }).setOrigin(0.5);
 
-    this.demoEnabled = new URLSearchParams(globalThis.location?.search ?? '').get('demo') === 'true';
+    const params = new URLSearchParams(globalThis.location?.search ?? '');
+    this.demoEnabled = params.get('demo') === 'true';
     const leaderStart = this.demoEnabled
       ? { x: width / 2 + 180, y: 315 }
       : { x: this.mode.couple ? width / 2 + 65 : width / 2, y: 330 };
@@ -65,14 +67,27 @@ export class BootScene extends Phaser.Scene {
       });
       this.followerLabel = this.createCharacterLabel(this.follower, this.mode.follower);
 
-      // Seed the recent route so the follower starts at the correct trail offset.
       for (let x = leaderStart.x - 150; x <= leaderStart.x; x += 6) {
         this.trail.record(x, leaderStart.y);
       }
     }
 
+    this.inputController = new PlayerInputController(this, {
+      touchEnabled: params.get('touch') === 'true'
+        ? true
+        : params.get('touch') === 'false'
+          ? false
+          : undefined,
+    });
+
+    const controlHint = this.demoEnabled
+      ? 'AUTO MOVEMENT DEMO · ADD ?demo=false FOR MANUAL CONTROL'
+      : this.inputController.touchEnabled
+        ? 'DRAG THE JOYSTICK TO MOVE'
+        : 'MOVE WITH WASD OR ARROW KEYS';
+
     this.add.text(width / 2, 470,
-      this.mode.couple ? 'LEADER → FOLLOWER · TRAIL DISTANCE 86 PX' : 'SINGLE CHARACTER MOVEMENT CORE',
+      this.mode.couple ? 'LEADER MOVES · FOLLOWER TRACES THE PATH' : 'SINGLE CHARACTER MOVEMENT',
       {
         fontFamily: '"Pixelify Sans", monospace',
         fontSize: '17px',
@@ -80,14 +95,11 @@ export class BootScene extends Phaser.Scene {
       },
     ).setOrigin(0.5);
 
-    this.demoLabel = this.add.text(width / 2, 494,
-      this.demoEnabled ? 'MOVEMENT DEMO: ON' : 'ADD ?demo=true TO PREVIEW MOVEMENT',
-      {
-        fontFamily: '"Pixelify Sans", monospace',
-        fontSize: '17px',
-        color: this.demoEnabled ? '#286b4e' : '#47766a',
-      },
-    ).setOrigin(0.5);
+    this.add.text(width / 2, 494, controlHint, {
+      fontFamily: '"Pixelify Sans", monospace',
+      fontSize: '16px',
+      color: this.demoEnabled ? '#286b4e' : '#47766a',
+    }).setOrigin(0.5);
 
     this.add.text(width / 2, height - 16,
       `MODE: ${this.mode.mode.toUpperCase()}  ·  G=${this.mode.gender}  ·  C=${this.mode.couple}`,
@@ -100,6 +112,8 @@ export class BootScene extends Phaser.Scene {
 
     this.leader.setDepth(this.leader.y);
     this.follower?.setDepth(this.follower.y);
+
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.inputController?.destroy());
   }
 
   createCharacterLabel(sprite, characterId) {
@@ -114,27 +128,31 @@ export class BootScene extends Phaser.Scene {
   }
 
   update(_time, delta) {
-    if (!this.demoEnabled || !this.leader) return;
+    if (!this.leader) return;
 
-    this.demoElapsed += Math.min(delta, 50);
-    const angle = this.demoElapsed * 0.00048;
-    const target = {
-      x: this.scale.width / 2 + Math.cos(angle) * 180,
-      y: 315 + Math.sin(angle) * 92,
-    };
+    let leaderVector;
+    if (this.demoEnabled) {
+      this.demoElapsed += Math.min(delta, 50);
+      const angle = this.demoElapsed * 0.00048;
+      const target = {
+        x: this.scale.width / 2 + Math.cos(angle) * 180,
+        y: 315 + Math.sin(angle) * 92,
+      };
+      leaderVector = vectorToTarget(this.leader, target);
+    } else {
+      leaderVector = this.inputController?.getVector() ?? { x: 0, y: 0 };
+    }
 
     const movement = updateCharacterMovement(
       this.leader,
-      vectorToTarget(this.leader, target),
+      leaderVector,
       delta,
-      { speed: 88, bounds: WORLD_BOUNDS },
+      { speed: 150, bounds: WORLD_BOUNDS },
     );
     this.updateCharacterVisual(this.leader, movement);
     this.updateLabelPosition(this.leader, this.leaderLabel);
 
-    if (movement.moved) {
-      this.trail.record(this.leader.x, this.leader.y);
-    }
+    if (movement.moved) this.trail.record(this.leader.x, this.leader.y);
 
     if (this.follower) {
       const follow = updateFollowerMovement(this.follower, this.trail, delta, {
