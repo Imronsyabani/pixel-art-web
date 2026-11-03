@@ -53,42 +53,26 @@ export class BootScene extends Phaser.Scene {
       direction: this.demoEnabled ? 'right' : 'down',
       state: 'idle',
     });
+    this.leaderLabel = this.createCharacterLabel(this.leader, this.mode.leader);
 
     this.trail = new CharacterTrail({ sampleSpacing: 3, maxLength: 1600 });
     if (this.mode.couple) {
-      const followerStart = this.demoEnabled
-        ? { x: leaderStart.x - 142, y: leaderStart.y }
-        : { x: leaderStart.x - 142, y: leaderStart.y };
+      const followerStart = { x: leaderStart.x - 142, y: leaderStart.y };
       this.follower = createCharacter(this, this.mode.follower, followerStart.x, followerStart.y, {
         scale: 2.25,
         direction: 'right',
         state: 'idle',
       });
+      this.followerLabel = this.createCharacterLabel(this.follower, this.mode.follower);
 
       // Seed the recent route so the follower starts at the correct trail offset.
-      const seedStart = leaderStart.x - 150;
-      for (let x = seedStart; x <= leaderStart.x; x += 6) {
+      for (let x = leaderStart.x - 150; x <= leaderStart.x; x += 6) {
         this.trail.record(x, leaderStart.y);
       }
     }
 
-    const nameFor = (characterId) => characterId === 'rintaro' ? 'RINTARO' : 'KAORUKO';
-    this.add.text(this.leader.x, this.leader.y + 62, nameFor(this.mode.leader), {
-      fontFamily: '"Pixelify Sans", monospace',
-      fontSize: '21px',
-      color: '#315d53',
-    }).setOrigin(0.5);
-
-    if (this.follower) {
-      this.add.text(this.follower.x, this.follower.y + 62, nameFor(this.mode.follower), {
-        fontFamily: '"Pixelify Sans", monospace',
-        fontSize: '21px',
-        color: '#315d53',
-      }).setOrigin(0.5);
-    }
-
-    this.add.text(width / 2, 454,
-      this.mode.couple ? 'LEADER → FOLLOWER · TRAIL DISTANCE 142 PX' : 'SINGLE CHARACTER MOVEMENT CORE',
+    this.add.text(width / 2, 470,
+      this.mode.couple ? 'LEADER → FOLLOWER · TRAIL DISTANCE 86 PX' : 'SINGLE CHARACTER MOVEMENT CORE',
       {
         fontFamily: '"Pixelify Sans", monospace',
         fontSize: '17px',
@@ -96,7 +80,7 @@ export class BootScene extends Phaser.Scene {
       },
     ).setOrigin(0.5);
 
-    this.demoLabel = this.add.text(width / 2, 486,
+    this.demoLabel = this.add.text(width / 2, 494,
       this.demoEnabled ? 'MOVEMENT DEMO: ON' : 'ADD ?demo=true TO PREVIEW MOVEMENT',
       {
         fontFamily: '"Pixelify Sans", monospace',
@@ -105,7 +89,7 @@ export class BootScene extends Phaser.Scene {
       },
     ).setOrigin(0.5);
 
-    this.add.text(width / 2, height - 20,
+    this.add.text(width / 2, height - 16,
       `MODE: ${this.mode.mode.toUpperCase()}  ·  G=${this.mode.gender}  ·  C=${this.mode.couple}`,
       {
         fontFamily: '"Pixelify Sans", monospace',
@@ -116,6 +100,17 @@ export class BootScene extends Phaser.Scene {
 
     this.leader.setDepth(this.leader.y);
     this.follower?.setDepth(this.follower.y);
+  }
+
+  createCharacterLabel(sprite, characterId) {
+    const name = characterId === 'rintaro' ? 'RINTARO' : 'KAORUKO';
+    return this.add.text(sprite.x, sprite.y + 54, name, {
+      fontFamily: '"Pixelify Sans", monospace',
+      fontSize: '18px',
+      color: '#315d53',
+      backgroundColor: 'rgba(238,250,241,0.68)',
+      padding: { x: 5, y: 1 },
+    }).setOrigin(0.5);
   }
 
   update(_time, delta) {
@@ -135,6 +130,7 @@ export class BootScene extends Phaser.Scene {
       { speed: 88, bounds: WORLD_BOUNDS },
     );
     this.updateCharacterVisual(this.leader, movement);
+    this.updateLabelPosition(this.leader, this.leaderLabel);
 
     if (movement.moved) {
       this.trail.record(this.leader.x, this.leader.y);
@@ -148,6 +144,7 @@ export class BootScene extends Phaser.Scene {
         bounds: WORLD_BOUNDS,
       });
       this.updateCharacterVisual(this.follower, follow);
+      this.updateLabelPosition(this.follower, this.followerLabel);
       this.follower.setDepth(this.follower.y);
     }
 
@@ -159,5 +156,11 @@ export class BootScene extends Phaser.Scene {
     const state = movement.moved ? 'walk' : 'idle';
     sprite.setData('direction', direction);
     playCharacterAnimation(sprite, state, direction);
+  }
+
+  updateLabelPosition(sprite, label) {
+    if (!label) return;
+    label.setPosition(sprite.x, sprite.y + 54);
+    label.setDepth(sprite.y + 1);
   }
 }

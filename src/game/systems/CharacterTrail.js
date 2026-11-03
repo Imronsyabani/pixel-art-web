@@ -81,11 +81,17 @@ export function updateFollowerMovement(follower, trail, deltaMs, options = {}) {
     return { moved: false, direction, target, x: follower.x, y: follower.y };
   }
 
-  const stepDistance = Math.min(gap - stopDistance, speed * Math.min(deltaMs, 50) / 1000);
+  const safeDeltaMs = Math.max(0, Math.min(Number(deltaMs) || 0, 50));
+  const maxStep = speed * safeDeltaMs / 1000;
+  if (maxStep <= 0) {
+    return { moved: false, direction, target, x: follower.x, y: follower.y };
+  }
+  const stepDistance = Math.min(gap - stopDistance, maxStep);
+  const ratio = stepDistance / maxStep;
   const stepVector = {
-    x: directionVector.x * (stepDistance / Math.max(speed * Math.min(deltaMs, 50) / 1000, 0.0001)),
-    y: directionVector.y * (stepDistance / Math.max(speed * Math.min(deltaMs, 50) / 1000, 0.0001)),
+    x: directionVector.x * ratio,
+    y: directionVector.y * ratio,
   };
-  const result = updateCharacterMovement(follower, stepVector, deltaMs, { speed, bounds });
+  const result = updateCharacterMovement(follower, stepVector, safeDeltaMs, { speed, bounds });
   return { ...result, target };
 }
