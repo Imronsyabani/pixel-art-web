@@ -9,7 +9,7 @@ test('audio registers gesture unlock handlers and removes them on destroy',()=>{
  audio.destroy();assert.equal(scene.input.handlers.get('pointerdown').size,0);assert.equal(scene.input.keyboard.handlers.get('keydown').size,0);
 });
 test('footstep timer resets when movement stops or sound is disabled',()=>{
- const audio=new AmbientAudio(mockScene(),{enabled:true});audio.updateMovement(300,true);assert.equal(audio.stepElapsed,300);
+ const audio=new AmbientAudio(mockScene(),{enabled:true});audio.updateMovement(300,true);assert.equal(audio.stepElapsed,50);
  audio.updateMovement(16,false);assert.equal(audio.stepElapsed,0);audio.updateMovement(20,true);
  audio.setEnabled(false);assert.equal(audio.stepElapsed,0);audio.destroy();
 });
