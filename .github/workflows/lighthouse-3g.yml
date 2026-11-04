@@ -33,10 +33,16 @@ jobs:
         run: npx --yes @lhci/cli@0.16.x autorun
         env:
           CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+      - name: Measure solo and couple game startup on simulated 3G
+        run: npm run performance:startup:3g
+        env:
+          CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: lighthouse-3g-report
-          path: .lighthouseci/
+          path: |
+            .lighthouseci/
+            artifacts/
           if-no-files-found: warn
           retention-days: 14

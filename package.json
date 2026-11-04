@@ -11,6 +11,7 @@
     "preview": "vite preview",
     "test": "node --test",
     "budget:check": "node scripts/check-performance-budget.mjs",
+    "performance:startup:3g": "node scripts/measure-game-startup-3g.mjs",
     "assets:validate": "node scripts/validate-character-assets.js",
     "assets:generate": "python scripts/generate_character_animations.py"
   },
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.11",
+    "puppeteer-core": "25.16.0",
     "tailwindcss": "^4.1.11",
     "vite": "^7.0.6"
   }

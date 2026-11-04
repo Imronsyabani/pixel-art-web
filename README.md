@@ -47,13 +47,14 @@ Only literal `C=true` enables couple mode. Missing or invalid `G` defaults to `b
 Font license: `public/licenses/PixelifySans-OFL.txt` (Pixelify Sans by Stefie Justprince).
 
 ## Startup and 3G performance
-- An immediate HTML loading shell is visible while the game modules and required assets load.
-- Phaser is dynamically imported and built as a separate engine chunk.
-- The game is revealed only after the local font, mode-specific character sheets, map, HUD, controls and initial scene are ready.
+- The first response is a static landing shell with an explicit `ENTER THE GARDEN` action; it does not download or execute Phaser.
+- Phaser is dynamically imported only after the player starts the game and is built as a separate engine chunk.
+- The game canvas stays hidden behind the loading screen until the local font, mode-specific character sheets, map, HUD, controls and initial scene are ready.
 - Solo URLs load only the selected character's idle/walk sheets; couple URLs load both characters.
 - Pixelify Sans is self-hosted through Fontsource; no Google Fonts request is needed at runtime.
 - Production gzip budgets: entry JavaScript 100 KiB, all JavaScript 700 KiB and CSS 70 KiB; image and font budgets are checked too.
-- Lighthouse CI runs Chrome with a mobile profile, 400 Kbps simulated throughput, 400 ms RTT and 4× CPU slowdown. Three runs are retained as a GitHub Actions artifact.
+- Lighthouse CI measures the static landing page in Chrome with a mobile profile, 400 Kbps simulated throughput, 400 ms RTT and 4× CPU slowdown. Three runs are retained as a GitHub Actions artifact.
+- A separate Puppeteer/Chrome startup test clicks `ENTER THE GARDEN` and measures time-to-ready for both solo and couple modes under the same simulated 3G/CPU profile; its JSON result is retained as an artifact.
 
 ## World and character assets
 - Garden is a 72×48 tile world with 32×32 tiles.
@@ -150,5 +151,8 @@ Font license: `public/licenses/PixelifySans-OFL.txt` (Pixelify Sans by Stefie Ju
 - [x] P9.13 Preload only character sheets required by the selected URL mode
 - [x] P9.14 Enforce production JavaScript, CSS, image and font size budgets
 - [x] P9.15 Add Chrome Lighthouse CI on a simulated 3G profile
+- [x] P9.16 Defer all Phaser imports and game initialization until explicit start
+- [x] P9.17 Keep the game canvas hidden until all required assets and scene components are ready
+- [x] P9.18 Measure solo/couple time-to-ready using Chrome with simulated 3G and 4× CPU
 
 Phase 7 collision feel and Phase 8/9 visual and audio behavior still require local browser/device verification. Lighthouse CI provides repeatable simulated-3G measurements; its score is not a guarantee across all devices or hosting environments.
