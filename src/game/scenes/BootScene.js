@@ -60,7 +60,7 @@ export class BootScene extends Phaser.Scene {
     const params = new URLSearchParams(globalThis.location?.search ?? '');
     this.demoEnabled = params.get('demo') === 'true';
 
-    this.cameras.main.setBackgroundColor('#236f9c');
+    this.cameras.main.setBackgroundColor('#6da85d');
     this.cameras.main.setBounds(0, 0, this.worldMap.worldWidth, this.worldMap.worldHeight);
     this.movementBounds = {
       left: WORLD_PADDING + CHARACTER_RADIUS,
@@ -139,14 +139,14 @@ export class BootScene extends Phaser.Scene {
       stroke: '#315d53',
       strokeThickness: 3,
     };
-    this.hudTitle = this.add.text(0, 0, 'CLIFF GARDEN', {
+    this.hudTitle = this.add.text(0, 0, 'BANYAN GARDEN', {
       ...baseStyle,
       fontSize: '32px',
       strokeThickness: 5,
       shadow: { offsetX: 2, offsetY: 2, color: '#23423d', blur: 2, fill: true },
     }).setScrollFactor(0).setDepth(5000);
 
-    this.hudSubtitle = this.add.text(0, 0, 'CLIFFSIDE FLOWER GARDEN', {
+    this.hudSubtitle = this.add.text(0, 0, 'FLOWER MEADOW', {
       ...baseStyle,
       fontSize: '17px',
       color: '#f3fff2',

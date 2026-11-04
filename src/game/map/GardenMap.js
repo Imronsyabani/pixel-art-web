@@ -147,57 +147,86 @@ function createPixelTexture(scene, key, width, height, draw) {
 }
 
 function createLargeProps(scene, treePosition) {
-  createPixelTexture(scene, 'garden-tree', 160, 176, (ctx) => {
-    fillPixel(ctx, 18, 146, 124, 18, 'rgba(43,74,51,0.22)');
-    fillPixel(ctx, 70, 94, 26, 68, '#65452f');
-    fillPixel(ctx, 75, 97, 15, 58, '#98643b');
-    fillPixel(ctx, 82, 102, 5, 48, '#b17b49');
-    const canopy = [
-      [22, 59, 52, 40, '#2e744e'], [50, 29, 62, 55, '#3f8d58'],
-      [89, 43, 49, 48, '#347b50'], [18, 88, 62, 42, '#438f58'],
-      [76, 83, 68, 45, '#2b704a'], [49, 9, 49, 42, '#4c9a5e'],
-      [103, 66, 34, 35, '#4b9658'],
+  createPixelTexture(scene, 'garden-banyan-tree', 384, 352, (ctx) => {
+    const seed = (x, y, salt = 0) => {
+      const value = Math.sin((x + salt * 13.7) * 127.1 + (y + salt * 7.1) * 311.7) * 43758.5453;
+      return value - Math.floor(value);
+    };
+
+    // Broad ground shadow and the thick trunk/root system.
+    fillPixel(ctx, 42, 316, 300, 18, 'rgba(34,65,43,0.30)');
+    fillPixel(ctx, 162, 160, 60, 166, '#563b2b');
+    fillPixel(ctx, 171, 156, 40, 164, '#795039');
+    fillPixel(ctx, 183, 158, 17, 156, '#a36b40');
+    fillPixel(ctx, 205, 177, 10, 132, '#65442f');
+
+    // Exposed roots radiate from the trunk like a mature banyan.
+    const roots = [
+      [170, 270, 28, 58], [186, 288, 16, 50], [205, 270, 27, 60],
+      [145, 299, 54, 18], [218, 300, 57, 17], [105, 306, 72, 10],
+      [246, 306, 70, 10], [156, 316, 38, 10], [203, 315, 42, 10],
     ];
-    for (const [x, y, w, h, color] of canopy) fillPixel(ctx, x, y, w, h, color);
-    for (let i = 0; i < 38; i += 1) {
-      const x = 20 + ((i * 37) % 122);
-      const y = 16 + ((i * 23) % 106);
-      const color = i % 5 === 0 ? '#86bb70' : i % 3 === 0 ? '#5aa364' : '#347c50';
-      fillPixel(ctx, x, y, 8, 7, color);
+    for (const [x, y, width, height] of roots) {
+      fillPixel(ctx, x, y, width, height, '#62432e');
+      fillPixel(ctx, x + 4, y + 2, Math.max(4, width - 10), Math.max(4, height - 5), '#91603a');
+      fillPixel(ctx, x + 10, y + 3, Math.max(3, width - 22), 3, '#b17b4d');
     }
-    fillPixel(ctx, 46, 42, 17, 8, '#9cc77c');
-    fillPixel(ctx, 98, 57, 14, 7, '#8dbf73');
-    fillPixel(ctx, 70, 73, 18, 8, '#65a96b');
-    fillPixel(ctx, 73, 151, 20, 5, '#553d2d');
-  });
-  createPixelTexture(scene, 'garden-bench', 112, 54, (ctx) => {
-    fillPixel(ctx, 8, 12, 96, 8, '#8c5938');
-    fillPixel(ctx, 8, 24, 96, 8, '#a66c43');
-    fillPixel(ctx, 12, 7, 88, 7, '#b17a4d');
-    fillPixel(ctx, 17, 31, 6, 18, '#594331');
-    fillPixel(ctx, 89, 31, 6, 18, '#594331');
-    fillPixel(ctx, 5, 44, 14, 4, '#65452f');
-    fillPixel(ctx, 87, 44, 14, 4, '#65452f');
-    fillPixel(ctx, 15, 14, 82, 2, '#d1975b');
-  });
-  createPixelTexture(scene, 'garden-lookout-rock', 80, 52, (ctx) => {
-    fillPixel(ctx, 7, 30, 66, 17, '#606b6c');
-    fillPixel(ctx, 17, 17, 49, 23, '#838e8b');
-    fillPixel(ctx, 29, 11, 29, 14, '#a5aaa0');
-    fillPixel(ctx, 27, 14, 14, 4, '#c3c5b7');
-    fillPixel(ctx, 13, 41, 56, 5, '#4d5c60');
+
+    // The canopy is built from stepped pixel clusters instead of a flat ellipse.
+    const lobes = [
+      [192, 116, 178, 102], [92, 125, 104, 82], [292, 122, 106, 84],
+      [145, 70, 106, 76], [241, 72, 108, 78], [42, 160, 42, 55],
+      [341, 158, 40, 54],
+    ];
+    const greens = ['#205a3b', '#2d7047', '#397f4e', '#4b9255', '#5da05e', '#77b36a'];
+    for (let y = 16; y < 252; y += 8) {
+      for (let x = 0; x < 384; x += 8) {
+        let distance = Infinity;
+        for (const [cx, cy, rx, ry] of lobes) {
+          const d = ((x + 4 - cx) / rx) ** 2 + ((y + 4 - cy) / ry) ** 2;
+          distance = Math.min(distance, d);
+        }
+        if (distance > 1.03) continue;
+        const noise = seed(x, y, 1);
+        const paletteIndex = noise > 0.91 ? 5 : noise > 0.73 ? 4 : noise > 0.49 ? 3 : noise > 0.22 ? 2 : 1;
+        const baseColor = greens[paletteIndex];
+        fillPixel(ctx, x, y, 8, 8, baseColor);
+        if (noise > 0.68) fillPixel(ctx, x + 2, y + 1, 4, 3, '#8cbe70');
+        if (noise < 0.16) fillPixel(ctx, x + 1, y + 5, 5, 2, '#174d36');
+      }
+    }
+
+    // Hanging aerial roots and vines beneath the canopy.
+    for (let index = 0; index < 18; index += 1) {
+      const x = 64 + index * 15 + Math.round(seed(index, 2, 3) * 8);
+      const startY = 144 + Math.round(seed(index, 4, 4) * 48);
+      const length = 35 + Math.round(seed(index, 5, 5) * 65);
+      fillPixel(ctx, x, startY, 3, length, index % 3 === 0 ? '#775039' : '#8c6341');
+      fillPixel(ctx, x + 1, startY + 4, 1, Math.max(8, length - 10), '#b08050');
+    }
+
+    // A foreground trunk face and bark highlights keep the tree readable at game scale.
+    fillPixel(ctx, 157, 190, 70, 134, '#65442f');
+    fillPixel(ctx, 169, 190, 43, 126, '#98633b');
+    fillPixel(ctx, 183, 193, 11, 117, '#b17a49');
+    fillPixel(ctx, 210, 204, 8, 98, '#805237');
+    fillPixel(ctx, 177, 238, 5, 48, '#5a3d2c');
+    fillPixel(ctx, 195, 222, 5, 70, '#74492f');
+    fillPixel(ctx, 154, 310, 74, 12, '#4f392b');
+
+    // Scattered leaf highlights add depth without introducing another prop.
+    for (let index = 0; index < 92; index += 1) {
+      const x = 22 + Math.floor(seed(index, 10, 6) * 340);
+      const y = 22 + Math.floor(seed(index, 18, 7) * 204);
+      fillPixel(ctx, x, y, 5 + (index % 3) * 2, 4, index % 4 === 0 ? '#a0c976' : '#6cad62');
+    }
   });
 
   const x = treePosition.x * TILE_SIZE + TILE_SIZE / 2;
   const y = treePosition.y * TILE_SIZE + TILE_SIZE * 1.15;
-  scene.add.image(x, y, 'garden-tree').setOrigin(0.5, 0.9).setDepth(y + 2);
-
-  scene.add.image(13 * TILE_SIZE, 13 * TILE_SIZE, 'garden-bench')
-    .setOrigin(0.5, 0.9).setDepth(13 * TILE_SIZE + 18);
-  scene.add.image(56 * TILE_SIZE, 30 * TILE_SIZE, 'garden-lookout-rock')
-    .setOrigin(0.5, 0.9).setDepth(30 * TILE_SIZE + 12);
-  scene.add.image(18 * TILE_SIZE, 35 * TILE_SIZE, 'garden-lookout-rock')
-    .setOrigin(0.5, 0.9).setDepth(35 * TILE_SIZE + 12);
+  scene.add.image(x, y, 'garden-banyan-tree')
+    .setOrigin(0.5, 0.94)
+    .setDepth(y + 2);
 }
 
 export function createGardenMap(scene) {
