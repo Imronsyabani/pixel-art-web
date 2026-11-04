@@ -1,14 +1,13 @@
 import { getJoystickMovementVector } from './inputMath.js';
 
 const OUTER_RADIUS = 54;
-const HIT_RADIUS = OUTER_RADIUS * 1.45;
 
 /** Semi-transparent touch joystick, drawn in fixed screen coordinates. */
 export class VirtualJoystick {
   constructor(scene, options = {}) {
     this.scene = scene;
     this.radius = options.radius ?? OUTER_RADIUS;
-    this.hitRadius = options.hitRadius ?? HIT_RADIUS;
+    this.hitRadius = options.hitRadius ?? this.radius * 1.45;
     this.centerX = options.x ?? 82;
     this.centerY = options.y ?? scene.scale.height - 88;
     this.knobX = this.centerX;
@@ -25,6 +24,18 @@ export class VirtualJoystick {
     scene.input.on('pointermove', this.onPointerMove);
     scene.input.on('pointerup', this.onPointerUp);
     scene.input.on('pointerupoutside', this.onPointerUp);
+    this.draw();
+  }
+
+  setLayout(x, y, radius = this.radius) {
+    this.centerX = x;
+    this.centerY = y;
+    this.radius = radius;
+    this.hitRadius = radius * 1.45;
+    this.pointerId = null;
+    this.vector = { x: 0, y: 0 };
+    this.knobX = x;
+    this.knobY = y;
     this.draw();
   }
 
