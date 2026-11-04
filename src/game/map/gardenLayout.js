@@ -24,18 +24,6 @@ export const GARDEN_TILE = Object.freeze({
 
 export const TREE_TILE_POSITION = Object.freeze({ x: 20, y: 11 });
 const SPAWN_TILE_POSITION = Object.freeze({ x: 20, y: 20 });
-const GRASS_TILES = Object.freeze([
-  GARDEN_TILE.grass,
-  GARDEN_TILE.grassLight,
-  GARDEN_TILE.grassDark,
-]);
-const FLOWER_TILES = Object.freeze([
-  GARDEN_TILE.flowerBlue,
-  GARDEN_TILE.flowerWhite,
-  GARDEN_TILE.flowerLilac,
-  GARDEN_TILE.flowerPink,
-]);
-
 function cellRandom(x, y, salt = 0) {
   const value = Math.sin((x + salt * 17.13) * 127.1 + (y + salt * 9.7) * 311.7) * 43758.5453;
   return value - Math.floor(value);
@@ -77,9 +65,9 @@ export function buildGardenLayout(columns = GARDEN_COLUMNS, rows = GARDEN_ROWS) 
 
       const treeDistance = Math.hypot(x + 0.5 - tree.x, y + 0.5 - tree.y);
       const spawnDistance = Math.hypot(x + 0.5 - spawn.x, y + 0.5 - spawn.y);
-      const beneathCanopy = treeDistance < 5.4;
+      const beneathTrunk = treeDistance < 1.65;
       const clearCharacterSpace = spawnDistance < 2.1;
-      if (beneathCanopy || clearCharacterSpace) continue;
+      if (beneathTrunk || clearCharacterSpace) continue;
 
       // Dense mixed flower cover, with blue flowers as the dominant color.
       if (cellRandom(x, y, 4) < 0.46) decor[y][x] = chooseFlower(x, y);
