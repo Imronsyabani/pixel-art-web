@@ -8,6 +8,7 @@ import { CharacterTrail, updateFollowerMovement } from '../systems/CharacterTrai
 import { vectorToTarget } from '../systems/movementMath.js';
 import { PlayerInputController } from '../systems/PlayerInputController.js';
 import { createGardenMap } from '../map/GardenMap.js';
+import { AmbientEnvironment } from '../systems/AmbientEnvironment.js';
 import { canOccupyPosition, getGardenObstacleRects } from '../map/GardenCollision.js';
 import { TILE_SIZE } from '../map/gardenLayout.js';
 
@@ -29,6 +30,7 @@ export class BootScene extends Phaser.Scene {
     this.mode = parseGameMode();
     registerCharacterAnimations(this);
     this.worldMap = createGardenMap(this);
+    this.ambient = new AmbientEnvironment(this, this.worldMap, this.worldMap.tree);
 
     const params = new URLSearchParams(globalThis.location?.search ?? '');
     this.demoEnabled = params.get('demo') === 'true';
@@ -89,7 +91,10 @@ export class BootScene extends Phaser.Scene {
 
     this.cameras.main.startFollow(this.leader, true, 0.08, 0.08);
     this.cameras.main.setDeadzone(300, 180);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.inputController?.destroy());
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.inputController?.destroy();
+      this.ambient?.destroy();
+    });
   }
 
   createHud(width, height) {
@@ -146,6 +151,7 @@ export class BootScene extends Phaser.Scene {
 
   update(_time, delta) {
     if (!this.leader) return;
+    this.ambient?.update(_time, delta);
 
     let leaderVector;
     if (this.demoEnabled) {

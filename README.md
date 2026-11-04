@@ -55,6 +55,13 @@ Only literal `C=true` enables couple mode. Missing or invalid `G` defaults to `b
 - Characters have a circular collision footprint. Movement uses swept substeps and wall sliding.
 - Follower advances along sampled leader trail segments instead of cutting across corners.
 
+## Ambient environment
+- A small set of ocean glints pulse and drift over water tiles.
+- Selected flowers sway gently with varied timing and amplitude.
+- Pixel leaves move subtly across the central tree canopy.
+- Lightweight petals float across the world and wrap at the map edges.
+- Ambient sprites are deterministic, bounded in count, and explicitly cleaned up when the scene shuts down.
+
 ## Task tracker
 
 ### Phase 1 — Foundation
@@ -102,8 +109,16 @@ Only literal `C=true` enables couple mode. Missing or invalid `G` defaults to `b
 - [x] P7.6 Add collision and follower tests
 - [ ] P7.7 Verify collision feel and camera edges in local browser
 
+### Phase 8 — Ambient Environment
+- [x] P8.1 Add subtle animated ocean highlights
+- [x] P8.2 Add gentle flower sway with varied phases
+- [x] P8.3 Add moving leaves on the central tree canopy
+- [x] P8.4 Add floating petals with world-edge wrapping
+- [x] P8.5 Keep ambient object counts bounded and clean them up on scene shutdown
+- [x] P8.6 Add deterministic ambient motion tests
+- [ ] P8.7 Verify visual quality and performance in local browser/device
+
 ### Roadmap
-- Phase 8: Ambient ocean, flower, leaf and petal animations
 - Phase 9: Responsive UI, audio and optimization
 
-Keyboard/touch input and screen-space joystick remain unchanged. Visual collision feel and camera behavior still require local browser/device verification.
+Keyboard/touch input and screen-space joystick remain unchanged. Phase 7 collision feel and Phase 8 ambient visuals still require local browser/device verification.
