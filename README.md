@@ -40,6 +40,8 @@ Only literal `C=true` enables couple mode. Missing or invalid `G` defaults to `b
 - Only the leader receives player input. In couple mode the follower traces the leader's path automatically.
 - `?touch=true` forces joystick UI for desktop preview; `?touch=false` hides it on touch-capable devices.
 - `?demo=true` runs the optional automatic movement demo.
+- Use the on-screen `SOUND ON/OFF` control or press `M` to toggle sound. Audio starts after the first user interaction, as required by browser autoplay rules.
+- `?sound=false` disables audio; `?sound=true` enables it. The selection is saved in local storage.
 
 ## World and character assets
 - Garden is a 72×48 tile world with 32×32 tiles.
@@ -60,7 +62,9 @@ Only literal `C=true` enables couple mode. Missing or invalid `G` defaults to `b
 - Selected flowers sway gently with varied timing and amplitude.
 - Pixel leaves move subtly across the central tree canopy.
 - Lightweight petals float across the world and wrap at the map edges.
-- Ambient sprites are deterministic, bounded in count, and explicitly cleaned up when the scene shuts down.
+- Ambient sprites are deterministic, bounded in count, updated at up to 30 FPS and explicitly cleaned up on scene shutdown.
+- The ambient animation pauses when the operating system requests reduced motion.
+- Ocean and breeze ambience plus procedural footstep sounds use Web Audio; no external audio assets are required.
 
 ## Task tracker
 
@@ -118,7 +122,15 @@ Only literal `C=true` enables couple mode. Missing or invalid `G` defaults to `b
 - [x] P8.6 Add deterministic ambient motion tests
 - [ ] P8.7 Verify visual quality and performance in local browser/device
 
-### Roadmap
-- Phase 9: Responsive UI, audio and optimization
+### Phase 9 — Responsive UI, Audio & Optimization
+- [x] P9.1 Resize canvas to fill desktop, tablet and portrait/landscape mobile viewports
+- [x] P9.2 Recalculate camera zoom, HUD layout and joystick position on resize/orientation changes
+- [x] P9.3 Respect mobile safe-area insets and touch interaction behavior
+- [x] P9.4 Add user-controlled sound toggle and keyboard shortcut
+- [x] P9.5 Add procedural ocean/breeze ambience and character footsteps
+- [x] P9.6 Persist sound preference and support URL sound override
+- [x] P9.7 Throttle ambient updates and respect reduced-motion preference
+- [x] P9.8 Add responsive/audio unit tests
+- [ ] P9.9 Verify layout, sound, and performance on local desktop and mobile devices
 
-Keyboard/touch input and screen-space joystick remain unchanged. Phase 7 collision feel and Phase 8 ambient visuals still require local browser/device verification.
+Phase 7 collision feel and Phase 8/9 visual and audio behavior still require local browser/device verification.

@@ -96,6 +96,8 @@ export class AmbientEnvironment {
     this.leaves = [];
     this.petals = [];
     this.elapsed = 0;
+    this.lastUpdate = -Infinity;
+    this.reducedMotion = Boolean(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
 
     buildAmbientTextures(scene);
     this.createWaveGlints();
@@ -189,8 +191,10 @@ export class AmbientEnvironment {
   }
 
   update(time, deltaMs) {
+    if (this.reducedMotion || (Number.isFinite(time) && time - this.lastUpdate < 33)) return;
     const delta = Math.max(0, Math.min(Number(deltaMs) || 0, 50));
     this.elapsed = Number.isFinite(time) ? time : this.elapsed + delta;
+    this.lastUpdate = this.elapsed;
 
     for (const flower of this.flowers) {
       flower.sprite.setRotation(getSwayRotation(this.elapsed, flower.phase, flower.amplitude, flower.speed));

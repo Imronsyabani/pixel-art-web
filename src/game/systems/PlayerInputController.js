@@ -1,5 +1,6 @@
 import { combineMovementInputs, getKeyboardMovementVector } from './inputMath.js';
 import { VirtualJoystick } from './VirtualJoystick.js';
+import { getResponsiveJoystickLayout } from './responsiveLayout.js';
 
 function detectTouchDevice(scene) {
   const phaserTouch = Boolean(scene.sys.game.device?.input?.touch);
@@ -17,13 +18,23 @@ export class PlayerInputController {
     this.touchEnabled = options.touchEnabled ?? detectTouchDevice(scene);
 
     this.keyboard?.addCapture(['UP', 'DOWN', 'LEFT', 'RIGHT', 'W', 'A', 'S', 'D']);
+    const joystickLayout = getResponsiveJoystickLayout(scene.scale.width, scene.scale.height);
     this.joystick = this.touchEnabled
       ? new VirtualJoystick(scene, {
-          x: options.joystickX ?? 82,
-          y: options.joystickY ?? scene.scale.height - 88,
-          radius: options.joystickRadius ?? 54,
+          ...joystickLayout,
+          x: options.joystickX ?? joystickLayout.x,
+          y: options.joystickY ?? joystickLayout.y,
+          radius: options.joystickRadius ?? joystickLayout.radius,
         })
       : null;
+    this.onResize = (size) => this.resize(size.width, size.height);
+    scene.scale?.on('resize', this.onResize);
+  }
+
+  resize(width, height) {
+    if (!this.joystick) return;
+    const layout = getResponsiveJoystickLayout(width, height);
+    this.joystick.setLayout(layout.x, layout.y, layout.radius);
   }
 
   getVector() {
@@ -37,6 +48,7 @@ export class PlayerInputController {
   }
 
   destroy() {
+    this.scene.scale?.off('resize', this.onResize);
     this.joystick?.destroy();
     this.joystick = null;
   }

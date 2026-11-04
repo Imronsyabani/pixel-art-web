@@ -25,6 +25,9 @@ body { min-height: 100vh; min-height: 100dvh; }
   height: 100vh;
   height: 100dvh;
   position: relative;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background: #236f9c;
 }
 
 #game-root {
@@ -34,10 +37,18 @@ body { min-height: 100vh; min-height: 100dvh; }
   min-height: 1px;
   overflow: hidden;
   touch-action: none;
+  position: relative;
+  isolation: isolate;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
 }
 
 #game-root canvas {
   display: block;
+  width: 100%;
+  height: 100%;
   image-rendering: pixelated;
   touch-action: none;
 }

@@ -7,6 +7,8 @@ import { updateCharacterMovement } from '../systems/CharacterMovementSystem.js';
 import { CharacterTrail, updateFollowerMovement } from '../systems/CharacterTrail.js';
 import { vectorToTarget } from '../systems/movementMath.js';
 import { PlayerInputController } from '../systems/PlayerInputController.js';
+import { AmbientAudio } from '../systems/AmbientAudio.js';
+import { getInitialSoundEnabled, getResponsiveCameraZoom, getResponsiveHudLayout } from '../systems/responsiveLayout.js';
 import { createGardenMap } from '../map/GardenMap.js';
 import { AmbientEnvironment } from '../systems/AmbientEnvironment.js';
 import { canOccupyPosition, getGardenObstacleRects } from '../map/GardenCollision.js';
@@ -14,6 +16,11 @@ import { TILE_SIZE } from '../map/gardenLayout.js';
 
 const WORLD_PADDING = TILE_SIZE * 3;
 const CHARACTER_RADIUS = 10;
+
+function readSavedSoundPreference() {
+  try { return globalThis.localStorage?.getItem('cliff-garden-audio') ?? null; }
+  catch { return null; }
+}
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -84,58 +91,118 @@ export class BootScene extends Phaser.Scene {
           : undefined
     );
     this.inputController = new PlayerInputController(this, { touchEnabled });
+    this.audio = new AmbientAudio(this, {
+      enabled: getInitialSoundEnabled(params.toString(), readSavedSoundPreference()),
+    });
+    this.audioKey = this.input.keyboard?.addKey(Phaser.Input.Keyboard.KeyCodes.M);
     this.createHud(width, height);
 
     this.leader.setDepth(this.leader.y);
     this.follower?.setDepth(this.follower.y);
 
     this.cameras.main.startFollow(this.leader, true, 0.08, 0.08);
-    this.cameras.main.setDeadzone(300, 180);
+    this.scale.on('resize', this.handleResize, this);
+    this.handleResize({ width, height });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.scale.off('resize', this.handleResize, this);
       this.inputController?.destroy();
+      this.audio?.destroy();
       this.ambient?.destroy();
     });
   }
 
   createHud(width, height) {
-    this.add.text(26, 20, 'CLIFF GARDEN', {
+    const baseStyle = {
       fontFamily: '"Pixelify Sans", monospace',
-      fontSize: '32px',
       color: '#ffffff',
       stroke: '#315d53',
+      strokeThickness: 3,
+    };
+    this.hudTitle = this.add.text(0, 0, 'CLIFF GARDEN', {
+      ...baseStyle,
+      fontSize: '32px',
       strokeThickness: 5,
       shadow: { offsetX: 2, offsetY: 2, color: '#23423d', blur: 2, fill: true },
     }).setScrollFactor(0).setDepth(5000);
 
-    this.add.text(28, 58, 'PHASE 7 · COLLISION & WORLD BOUNDARIES', {
-      fontFamily: '"Pixelify Sans", monospace',
+    this.hudSubtitle = this.add.text(0, 0, 'CLIFFSIDE FLOWER GARDEN', {
+      ...baseStyle,
       fontSize: '17px',
       color: '#f3fff2',
-      stroke: '#315d53',
-      strokeThickness: 3,
     }).setScrollFactor(0).setDepth(5000);
 
-    const modeLabel = `MODE: ${this.mode.mode.toUpperCase()} · G=${this.mode.gender} · C=${this.mode.couple}`;
-    this.add.text(width - 22, 22, modeLabel, {
+    const modeText = this.mode.couple
+      ? `COUPLE · ${this.mode.gender.toUpperCase()} LEADS`
+      : `SOLO · ${this.mode.leader === 'rintaro' ? 'RINTARO' : 'KAORUKO'}`;
+    this.modeLabel = this.add.text(0, 0, modeText, {
       fontFamily: '"Pixelify Sans", monospace',
       fontSize: '14px',
       color: '#ffffff',
-      backgroundColor: 'rgba(35,66,61,0.62)',
+      backgroundColor: 'rgba(35,66,61,0.68)',
       padding: { x: 8, y: 5 },
     }).setOrigin(1, 0).setScrollFactor(0).setDepth(5000);
+
+    this.audioButton = this.add.text(0, 0, '', {
+      fontFamily: '"Pixelify Sans", monospace',
+      fontSize: '14px',
+      color: '#ffffff',
+      backgroundColor: 'rgba(35,66,61,0.78)',
+      padding: { x: 9, y: 6 },
+    }).setOrigin(1, 0).setScrollFactor(0).setDepth(5001)
+      .setInteractive({ useHandCursor: true });
+    this.audioButton.on('pointerdown', () => this.toggleAudio());
 
     const hint = this.demoEnabled
       ? 'AUTO MOVEMENT DEMO'
       : this.inputController?.touchEnabled
-        ? 'DRAG JOYSTICK TO MOVE'
-        : 'WASD / ARROW KEYS TO MOVE';
-    this.controlHint = this.add.text(width / 2, height - 18, hint, {
+        ? 'JOYSTICK · DRAG TO MOVE'
+        : 'WASD / ARROWS · MOVE';
+    this.controlHint = this.add.text(0, 0, hint, {
       fontFamily: '"Pixelify Sans", monospace',
       fontSize: '15px',
       color: '#ffffff',
-      backgroundColor: 'rgba(35,66,61,0.56)',
-      padding: { x: 10, y: 4 },
-    }).setOrigin(0.5, 1).setScrollFactor(0).setDepth(5000);
+      backgroundColor: 'rgba(35,66,61,0.62)',
+      padding: { x: 10, y: 5 },
+    }).setOrigin(1, 1).setScrollFactor(0).setDepth(5000);
+
+    this.layoutHud(width, height);
+    this.updateAudioButton();
+  }
+
+  layoutHud(width, height) {
+    const { margin, titleSize, bodySize, compact } = getResponsiveHudLayout(width, height);
+    this.hudTitle.setPosition(margin, margin).setFontSize(titleSize);
+    this.hudSubtitle
+      .setPosition(margin, margin + titleSize + 2)
+      .setFontSize(bodySize)
+      .setVisible(!compact);
+    this.modeLabel.setPosition(width - margin, margin).setFontSize(bodySize);
+    this.audioButton.setPosition(width - margin, margin + bodySize + 19).setFontSize(bodySize);
+    this.controlHint
+      .setPosition(width - margin, height - margin)
+      .setFontSize(bodySize)
+      .setVisible(width >= 320 && height >= 260);
+  }
+
+  handleResize(gameSize) {
+    const width = gameSize?.width ?? this.scale.width;
+    const height = gameSize?.height ?? this.scale.height;
+    this.cameras.main.setZoom(getResponsiveCameraZoom(width, height));
+    this.cameras.main.setDeadzone(Math.min(300, width * 0.32), Math.min(180, height * 0.34));
+    this.inputController?.resize(width, height);
+    if (this.hudTitle) this.layoutHud(width, height);
+  }
+
+  updateAudioButton() {
+    if (!this.audioButton || !this.audio) return;
+    const state = this.audio.available ? (this.audio.enabled ? 'ON' : 'OFF') : 'N/A';
+    this.audioButton.setText(`SOUND ${state} · M`);
+  }
+
+  toggleAudio() {
+    if (!this.audio) return;
+    this.audio.setEnabled(!this.audio.enabled);
+    this.updateAudioButton();
   }
 
   createCharacterLabel(sprite, characterId) {
@@ -152,6 +219,7 @@ export class BootScene extends Phaser.Scene {
   update(_time, delta) {
     if (!this.leader) return;
     this.ambient?.update(_time, delta);
+    if (this.audioKey && Phaser.Input.Keyboard.JustDown(this.audioKey)) this.toggleAudio();
 
     let leaderVector;
     if (this.demoEnabled) {
@@ -178,6 +246,7 @@ export class BootScene extends Phaser.Scene {
         maxSubstep: 3,
       },
     );
+    this.audio?.updateMovement(delta, movement.moved);
     this.updateCharacterVisual(this.leader, movement);
     this.updateLabelPosition(this.leader, this.leaderLabel);
 

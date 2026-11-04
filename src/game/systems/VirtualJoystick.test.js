@@ -77,3 +77,19 @@ test('pointer release resets the joystick and removes listeners on destroy', () 
   assert.equal(scene.input.count('pointermove'), 0);
   assert.equal(scene.graphics.destroyed, true);
 });
+
+
+test('responsive layout resets an active drag and moves the joystick safely', () => {
+  const scene = createMockScene();
+  const joystick = new VirtualJoystick(scene, { x: 80, y: 450, radius: 50 });
+  scene.input.emit('pointerdown', { id: 1, x: 80, y: 450, isDown: true });
+  scene.input.emit('pointermove', { id: 1, x: 130, y: 450, isDown: true });
+  joystick.setLayout(62, 690, 42);
+  assert.equal(joystick.pointerId, null);
+  assert.deepEqual(joystick.getVector(), { x: 0, y: 0 });
+  assert.equal(joystick.centerX, 62);
+  assert.equal(joystick.centerY, 690);
+  assert.ok(Math.hypot(joystick.knobX - 62, joystick.knobY - 690) <= 42.001);
+  assert.equal(joystick.hitRadius, 60.9);
+  joystick.destroy();
+});
