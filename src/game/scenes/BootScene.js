@@ -86,7 +86,6 @@ export class BootScene extends Phaser.Scene {
       direction: this.demoEnabled ? 'right' : 'down',
       state: 'idle',
     });
-    this.leaderLabel = this.createCharacterLabel(this.leader, this.mode.leader);
 
     this.trail = new CharacterTrail({ sampleSpacing: 3, maxLength: 1800 });
     if (this.mode.couple) {
@@ -96,7 +95,6 @@ export class BootScene extends Phaser.Scene {
         direction: 'right',
         state: 'idle',
       });
-      this.followerLabel = this.createCharacterLabel(this.follower, this.mode.follower);
       for (let x = leaderStart.x - 150; x <= leaderStart.x; x += 6) {
         this.trail.record(x, leaderStart.y);
       }
@@ -226,17 +224,6 @@ export class BootScene extends Phaser.Scene {
     this.updateAudioButton();
   }
 
-  createCharacterLabel(sprite, characterId) {
-    const name = characterId === 'rintaro' ? 'RINTARO' : 'KAORUKO';
-    return this.add.text(sprite.x, sprite.y + 54, name, {
-      fontFamily: '"Pixelify Sans Variable", monospace',
-      fontSize: '17px',
-      color: '#ffffff',
-      backgroundColor: 'rgba(35,66,61,0.68)',
-      padding: { x: 5, y: 1 },
-    }).setOrigin(0.5).setDepth(sprite.y + 1);
-  }
-
   update(_time, delta) {
     if (!this.leader) return;
     this.ambient?.update(_time, delta);
@@ -269,7 +256,6 @@ export class BootScene extends Phaser.Scene {
     );
     this.audio?.updateMovement(delta, movement.moved);
     this.updateCharacterVisual(this.leader, movement);
-    this.updateLabelPosition(this.leader, this.leaderLabel);
 
     if (movement.moved) this.trail.record(this.leader.x, this.leader.y);
 
@@ -283,7 +269,6 @@ export class BootScene extends Phaser.Scene {
         radius: CHARACTER_RADIUS,
       });
       this.updateCharacterVisual(this.follower, follow);
-      this.updateLabelPosition(this.follower, this.followerLabel);
       this.follower.setDepth(this.follower.y);
     }
 
@@ -297,9 +282,4 @@ export class BootScene extends Phaser.Scene {
     playCharacterAnimation(sprite, state, direction);
   }
 
-  updateLabelPosition(sprite, label) {
-    if (!label) return;
-    label.setPosition(sprite.x, sprite.y + 54);
-    label.setDepth(sprite.y + 1);
-  }
 }
