@@ -20,13 +20,13 @@ test('garden is a compact 40 by 28 tile grass meadow', () => {
 
   const groundIds = new Set(layout.ground.flat());
   for (const tile of [GARDEN_TILE.grass, GARDEN_TILE.grassLight, GARDEN_TILE.grassDark]) {
-    assert.ok(groundIds.has(tile), \`expected grass tile id \${tile}\`);
+    assert.ok(groundIds.has(tile), 'expected grass tile id ' + tile);
   }
   for (const tile of [
     GARDEN_TILE.water, GARDEN_TILE.waterWave, GARDEN_TILE.sand,
     GARDEN_TILE.wetSand, GARDEN_TILE.cliffTop, GARDEN_TILE.path,
     GARDEN_TILE.pathAlt,
-  ]) assert.equal(groundIds.has(tile), false, \`unexpected terrain tile \${tile}\`);
+  ]) assert.equal(groundIds.has(tile), false, 'unexpected terrain tile ' + tile);
 });
 
 test('flowers cover the meadow with a blue-dominant mix of four colors', () => {
@@ -42,7 +42,7 @@ test('flowers cover the meadow with a blue-dominant mix of four colors', () => {
     GARDEN_TILE.flowerWhite,
     GARDEN_TILE.flowerLilac,
     GARDEN_TILE.flowerPink,
-  ]) assert.ok((counts.get(tile) ?? 0) > 0, \`missing flower tile \${tile}\`);
+  ]) assert.ok((counts.get(tile) ?? 0) > 0, 'missing flower tile ' + tile);
   assert.ok(counts.get(GARDEN_TILE.flowerBlue) > counts.get(GARDEN_TILE.flowerPink));
 });
 
