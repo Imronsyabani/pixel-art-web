@@ -4,15 +4,42 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#236f9c" />
-    <meta name="description" content="A quiet pixel-art exploration game in a cliffside garden." />
+    <meta name="description" content="Explore a peaceful pixel-art cliffside garden, with Rintaro and Kaoruko." />
+    <meta name="color-scheme" content="dark" />
     <title>Cliff Garden</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      html, body, #app { width:100%;height:100%;min-height:100%;margin:0;overflow:hidden; }
+      body { background:#236f9c; }
+      #app { width:100vw;height:100vh;height:100dvh;position:relative;background:#236f9c; }
+      #game-root { width:100%;height:100%;min-width:1px;min-height:1px;overflow:hidden;touch-action:none; }
+      #app-loading {
+        position:fixed;inset:0;z-index:100000;display:grid;place-content:center;justify-items:center;
+        gap:18px;padding:24px;background:#236f9c;color:#fff;text-align:center;
+        font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+        transition:opacity .22s ease,visibility .22s ease;
+      }
+      #app-loading.is-hidden { opacity:0;visibility:hidden;pointer-events:none; }
+      #app-loading-title { margin:0;font:700 clamp(26px,7vw,42px)/1.1 "Courier New",monospace;letter-spacing:.04em; }
+      #app-loading-status { margin:0;font:500 14px/1.4 system-ui,sans-serif;color:#e3f6f2; }
+      #app-loading-track { width:min(72vw,320px);height:10px;overflow:hidden;border:1px solid rgba(255,255,255,.7);border-radius:99px;background:rgba(255,255,255,.16); }
+      #app-loading-progress { width:0;height:100%;background:#b9e5d3;transition:width .12s linear; }
+      #app-loading-error { display:none;max-width:340px;color:#ffe0dc;line-height:1.5; }
+      #app-loading.is-error #app-loading-error { display:block; }
+      #app-loading-retry { display:none;padding:9px 16px;border:1px solid #fff;border-radius:6px;background:#fff;color:#23423d;font-weight:700; }
+      #app-loading.is-error #app-loading-retry { display:inline-block; }
+      @media (prefers-reduced-motion:reduce) { #app-loading { transition:none; } }
+    </style>
   </head>
   <body>
     <main id="app">
       <div id="game-root" aria-label="Cliff Garden game"></div>
+      <section id="app-loading" role="status" aria-live="polite" aria-label="Loading Cliff Garden">
+        <h1 id="app-loading-title">CLIFF GARDEN</h1>
+        <p id="app-loading-status">Preparing the garden…</p>
+        <div id="app-loading-track" aria-hidden="true"><div id="app-loading-progress"></div></div>
+        <p id="app-loading-error" role="alert"></p>
+        <button id="app-loading-retry" type="button" onclick="window.location.reload()">Reload game</button>
+      </section>
     </main>
     <script type="module" src="/src/main.js"></script>
   </body>

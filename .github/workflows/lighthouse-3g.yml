@@ -1,0 +1,42 @@
+name: Lighthouse 3G Performance
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse-3g:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: browser-actions/setup-chrome@v2
+        id: setup-chrome
+      - run: python -m pip install -r requirements-assets.txt
+      - run: npm install
+      - run: npm run assets:generate
+      - run: npm run assets:validate
+      - run: npm run build:ci
+      - name: Run Lighthouse on simulated 3G
+        run: npx --yes @lhci/cli@0.16.x autorun
+        env:
+          CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-3g-report
+          path: .lighthouseci/
+          if-no-files-found: warn
+          retention-days: 14

@@ -6,14 +6,16 @@
   "scripts": {
     "predev": "npm run assets:generate",
     "dev": "vite",
-    "build": "npm run assets:generate && npm run assets:validate && vite build",
-    "build:ci": "vite build",
+    "build": "npm run assets:generate && npm run assets:validate && vite build && npm run budget:check",
+    "build:ci": "vite build && npm run budget:check",
     "preview": "vite preview",
     "test": "node --test",
+    "budget:check": "node scripts/check-performance-budget.mjs",
     "assets:validate": "node scripts/validate-character-assets.js",
     "assets:generate": "python scripts/generate_character_animations.py"
   },
   "dependencies": {
+    "@fontsource-variable/pixelify-sans": "5.3.0",
     "phaser": "^3.90.0"
   },
   "devDependencies": {

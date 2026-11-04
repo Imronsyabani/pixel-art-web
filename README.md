@@ -5,7 +5,7 @@ A responsive pixel-art exploration game set in a peaceful cliffside flower garde
 ## Stack
 - JavaScript ES modules
 - Phaser 3 tilemaps
-- Vite, Tailwind CSS 4, Pixelify Sans
+- Vite, Tailwind CSS 4, locally bundled Pixelify Sans Variable (SIL OFL 1.1)
 - Python + Pillow for reproducible character sprite generation
 
 ## Run locally
@@ -21,6 +21,7 @@ npm run assets:generate
 npm run assets:validate
 npm test
 npm run build
+npm run budget:check
 ```
 
 ## URL mode
@@ -42,6 +43,17 @@ Only literal `C=true` enables couple mode. Missing or invalid `G` defaults to `b
 - `?demo=true` runs the optional automatic movement demo.
 - Use the on-screen `SOUND ON/OFF` control or press `M` to toggle sound. Audio starts after the first user interaction, as required by browser autoplay rules.
 - `?sound=false` disables audio; `?sound=true` enables it. The selection is saved in local storage.
+
+Font license: `public/licenses/PixelifySans-OFL.txt` (Pixelify Sans by Stefie Justprince).
+
+## Startup and 3G performance
+- An immediate HTML loading shell is visible while the game modules and required assets load.
+- Phaser is dynamically imported and built as a separate engine chunk.
+- The game is revealed only after the local font, mode-specific character sheets, map, HUD, controls and initial scene are ready.
+- Solo URLs load only the selected character's idle/walk sheets; couple URLs load both characters.
+- Pixelify Sans is self-hosted through Fontsource; no Google Fonts request is needed at runtime.
+- Production gzip budgets: entry JavaScript 100 KiB, all JavaScript 700 KiB and CSS 70 KiB; image and font budgets are checked too.
+- Lighthouse CI runs Chrome with a mobile profile, 400 Kbps simulated throughput, 400 ms RTT and 4× CPU slowdown. Three runs are retained as a GitHub Actions artifact.
 
 ## World and character assets
 - Garden is a 72×48 tile world with 32×32 tiles.
@@ -132,5 +144,11 @@ Only literal `C=true` enables couple mode. Missing or invalid `G` defaults to `b
 - [x] P9.7 Throttle ambient updates and respect reduced-motion preference
 - [x] P9.8 Add responsive/audio unit tests
 - [ ] P9.9 Verify layout, sound, and performance on local desktop and mobile devices
+- [x] P9.10 Show an immediate HTML loading shell and hold the game behind a startup barrier
+- [x] P9.11 Dynamically import Phaser and split it into a separate engine chunk
+- [x] P9.12 Self-host Pixelify Sans and remove the Google Fonts runtime dependency
+- [x] P9.13 Preload only character sheets required by the selected URL mode
+- [x] P9.14 Enforce production JavaScript, CSS, image and font size budgets
+- [x] P9.15 Add Chrome Lighthouse CI on a simulated 3G profile
 
-Phase 7 collision feel and Phase 8/9 visual and audio behavior still require local browser/device verification.
+Phase 7 collision feel and Phase 8/9 visual and audio behavior still require local browser/device verification. Lighthouse CI provides repeatable simulated-3G measurements; its score is not a guarantee across all devices or hosting environments.

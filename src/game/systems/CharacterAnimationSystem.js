@@ -24,8 +24,9 @@ export function getCharacterAnimationFrames(characterId, state = 'idle', directi
 }
 
 /** Register looping idle and walk animations for every character and direction. */
-export function registerCharacterAnimations(scene) {
-  for (const asset of Object.values(CHARACTER_ASSETS)) {
+export function registerCharacterAnimations(scene, characterIds = Object.keys(CHARACTER_ASSETS)) {
+  const selected = new Set(characterIds);
+  for (const asset of Object.values(CHARACTER_ASSETS).filter((item) => selected.has(item.id))) {
     for (const direction of asset.directions) {
       for (const state of Object.keys(CHARACTER_ANIMATION_STATES)) {
         const key = getCharacterAnimationKey(asset.id, state, direction);

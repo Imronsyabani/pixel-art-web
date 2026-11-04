@@ -26,3 +26,7 @@ export const gameConfig = {
   },
   scene: [BootScene],
 };
+
+export function createGame() {
+  return new Phaser.Game(gameConfig);
+}

@@ -29,13 +29,31 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload() {
-    preloadCharacterAssets(this);
+    this.mode = parseGameMode();
+    this.assetLoadErrors = [];
+    this.load.on('progress', (value) => {
+      window.dispatchEvent(new CustomEvent('cliff-garden:progress', { detail: { value } }));
+    });
+    this.load.once('complete', () => {
+      window.dispatchEvent(new Event('cliff-garden:preparing'));
+    });
+    this.load.on('loaderror', (file) => {
+      const source = file?.src ?? file?.key ?? 'unknown asset';
+      this.assetLoadErrors.push(source);
+    });
+    preloadCharacterAssets(this, this.mode.visibleCharacters);
   }
 
   create() {
     const { width, height } = this.scale;
-    this.mode = parseGameMode();
-    registerCharacterAnimations(this);
+    if (this.assetLoadErrors.length) {
+      window.dispatchEvent(new CustomEvent('cliff-garden:error', {
+        detail: { message: `Could not load required character assets: ${this.assetLoadErrors.join(', ')}` },
+      }));
+      return;
+    }
+    this.mode = this.mode ?? parseGameMode();
+    registerCharacterAnimations(this, this.mode.visibleCharacters);
     this.worldMap = createGardenMap(this);
     this.ambient = new AmbientEnvironment(this, this.worldMap, this.worldMap.tree);
 
@@ -109,11 +127,14 @@ export class BootScene extends Phaser.Scene {
       this.audio?.destroy();
       this.ambient?.destroy();
     });
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      window.dispatchEvent(new Event('cliff-garden:ready'));
+    }));
   }
 
   createHud(width, height) {
     const baseStyle = {
-      fontFamily: '"Pixelify Sans", monospace',
+      fontFamily: '"Pixelify Sans Variable", monospace',
       color: '#ffffff',
       stroke: '#315d53',
       strokeThickness: 3,
@@ -135,7 +156,7 @@ export class BootScene extends Phaser.Scene {
       ? `COUPLE · ${this.mode.gender.toUpperCase()} LEADS`
       : `SOLO · ${this.mode.leader === 'rintaro' ? 'RINTARO' : 'KAORUKO'}`;
     this.modeLabel = this.add.text(0, 0, modeText, {
-      fontFamily: '"Pixelify Sans", monospace',
+      fontFamily: '"Pixelify Sans Variable", monospace',
       fontSize: '14px',
       color: '#ffffff',
       backgroundColor: 'rgba(35,66,61,0.68)',
@@ -143,7 +164,7 @@ export class BootScene extends Phaser.Scene {
     }).setOrigin(1, 0).setScrollFactor(0).setDepth(5000);
 
     this.audioButton = this.add.text(0, 0, '', {
-      fontFamily: '"Pixelify Sans", monospace',
+      fontFamily: '"Pixelify Sans Variable", monospace',
       fontSize: '14px',
       color: '#ffffff',
       backgroundColor: 'rgba(35,66,61,0.78)',
@@ -158,7 +179,7 @@ export class BootScene extends Phaser.Scene {
         ? 'JOYSTICK · DRAG TO MOVE'
         : 'WASD / ARROWS · MOVE';
     this.controlHint = this.add.text(0, 0, hint, {
-      fontFamily: '"Pixelify Sans", monospace',
+      fontFamily: '"Pixelify Sans Variable", monospace',
       fontSize: '15px',
       color: '#ffffff',
       backgroundColor: 'rgba(35,66,61,0.62)',
@@ -208,7 +229,7 @@ export class BootScene extends Phaser.Scene {
   createCharacterLabel(sprite, characterId) {
     const name = characterId === 'rintaro' ? 'RINTARO' : 'KAORUKO';
     return this.add.text(sprite.x, sprite.y + 54, name, {
-      fontFamily: '"Pixelify Sans", monospace',
+      fontFamily: '"Pixelify Sans Variable", monospace',
       fontSize: '17px',
       color: '#ffffff',
       backgroundColor: 'rgba(35,66,61,0.68)',

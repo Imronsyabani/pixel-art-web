@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  font-family: "Pixelify Sans", system-ui, sans-serif;
+  font-family: "Pixelify Sans Variable", system-ui, sans-serif;
   color: #23423d;
-  background: #b8e8df;
+  background: #236f9c;
   font-synthesis: none;
-  text-rendering: optimizeLegibility;
+  text-rendering: auto;
 }
 
 * { box-sizing: border-box; }
@@ -51,4 +51,8 @@ body { min-height: 100vh; min-height: 100dvh; }
   height: 100%;
   image-rendering: pixelated;
   touch-action: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; }
 }
